@@ -1,0 +1,79 @@
+/* ABC fonts */
+@font-face {
+  font-family: "ABCSans Regular";
+  font-style: normal;
+  font-weight: normal;
+  src: local("ABCSans Regular"), url("./abcsans-regular.woff") format("woff");
+}
+@font-face {
+  font-family: "ABCSans Black";
+  font-style: normal;
+  font-weight: normal;
+  src: local("ABCSans Black"), url("./abcsans-black.woff") format("woff");
+}
+
+:root {
+  font-size: 1em;
+  font-family: "ABCSans Regular", "Arial", sans-serif;
+}
+html, body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: rgb(238, 238, 238);
+}
+#container {
+  padding: 1rem;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-flow: column;
+}
+#title {
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: #1C1C1C;
+  margin: 0 0 .5rem 0;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+tr {
+  border-bottom: dotted .5px #1C1C1C;
+}
+ul {
+  margin: 0;
+  padding: 0;
+  list-style-position: inside;
+}
+td:last-child {
+  font-family: "ABCSans Black", "Arial Black", sans-serif;
+  text-align: right;
+}
+#treemap {
+  margin-top: 1rem;
+  width: 100%;
+  height: 100%;
+}
+rect.recovered, #recovered td:last-child {
+  fill: #009CBF;
+  color: #009CBF;
+}
+rect.negative, #negative td:last-child {
+  fill: #00B395;
+  color: #00B395;
+}
+rect.infected, #infected td:last-child {
+  fill: #FFB300;
+  color: #FFB300;
+}
+rect.dead, #dead td:last-child {
+  fill: #FF6100;
+  color: #FF6100;
+}
