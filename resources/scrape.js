@@ -17,16 +17,27 @@ async function scrape() {
       });
       await page.goto(dashUrl);
       await page.waitForSelector(".card")
-      cards = await page.evaluate(function() {
-        let cards = [];
+      latest = await page.evaluate(function() {
+        let data = [];
         document.querySelectorAll(".card")
           .forEach(function(d) {
-            cards.push(d.querySelector("tspan").innerHTML);
+            data.push(d.querySelector("tspan").innerHTML);
           });
-        return cards;
+        return data;
       });
-      console.log(cards);
-      await page.waitFor(5000);
+      data = {
+        latest: {
+          recovered: latest[0],
+          confirmed: latest[1],
+          deaths: latest[2],
+          date: latest[3]
+        }
+      };
+      console.log("scraped latest update:");
+      console.log(data.latest);
+      console.log("load time-series data ...");
+      console.log(document.querySelector(".pbi-glyph-chevronrightmedium"));
+      await page.waitForSelector("input");
       browser.close();
       return resolve(data);
     } catch (error) {
@@ -37,8 +48,8 @@ async function scrape() {
 
 scrape()
   .then(function(data) {
-    fs.writeFile("./latestCount.json", JSON.stringify(data), function(error) {
-      console.log("\nlatestCount.json written");
+    fs.writeFile("./scrapeData.json", JSON.stringify(data), function(error) {
+      console.log("\nscrapeData.json written");
     });
   })
   .catch(console.error);
