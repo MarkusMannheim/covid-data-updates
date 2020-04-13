@@ -12,7 +12,6 @@ async function scrape() {
       await page.goto("https://www.covid19.act.gov.au/updates/confirmed-case-information");
       await page.waitForSelector(".col-md-12");
       console.log("load Power BI dashboard ...");
-      // await page.click(".col-md-12 a");
       dashUrl = await page.evaluate(function() {
         return document.querySelector(".col-md-12 a").href;
       });
@@ -34,12 +33,6 @@ async function scrape() {
         date: latest[3]
       };
       console.log(latest);
-      await page.waitForSelector(".pbi-glyph-chevronrightmedium");
-      await page.evaluate(function() {
-        document.querySelector(".pbi-glyph-chevronrightmedium").click();
-      });
-      console.log("Clicked the arrow!");
-      await page.waitFor(5000);
       browser.close();
       return resolve(latest);
     } catch (error) {
