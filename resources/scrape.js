@@ -1,9 +1,10 @@
-puppeteer = require("puppeteer"),
-fs = require("fs");
+const puppeteer = require("puppeteer"),
+      d3 = require("d3");
+      fs = require("fs");
 
 async function scrape() {
-  console.log("\nestablish scraper ...");
-  browser = await puppeteer.launch({headless: false}),
+  console.log("establish scraper ...");
+  browser = await puppeteer.launch(),
   page = await browser.newPage();
   return new Promise(async function(resolve, reject) {
     try {
@@ -11,13 +12,14 @@ async function scrape() {
       await page.goto("https://www.covid19.act.gov.au/updates/confirmed-case-information");
       await page.waitForSelector(".col-md-12");
       console.log("load Power BI dashboard ...");
-      await page.click(".col-md-12 a");
+      // await page.click(".col-md-12 a");
       dashUrl = await page.evaluate(function() {
         return document.querySelector(".col-md-12 a").href;
       });
       await page.goto(dashUrl);
-      await page.waitForSelector(".card")
-      cards = await page.evaluate(function() {
+      await page.waitForSelector(".card");
+      console.log("scrape latest counts ...");
+      latest = await page.evaluate(function() {
         let cards = [];
         document.querySelectorAll(".card")
           .forEach(function(d) {
@@ -25,10 +27,15 @@ async function scrape() {
           });
         return cards;
       });
-      console.log(cards);
-      await page.waitFor(5000);
+      latest = {
+        confirmed: latest[1],
+        recovered: latest[0],
+        deaths: latest[2],
+        date: latest[3]
+      };
+      console.log(latest);
       browser.close();
-      return resolve(data);
+      return resolve(latest);
     } catch (error) {
       return reject(error);
     }
@@ -36,9 +43,20 @@ async function scrape() {
 }
 
 scrape()
-  .then(function(data) {
-    fs.writeFile("./latestCount.json", JSON.stringify(data), function(error) {
-      console.log("\nlatestCount.json written");
+  .then(function(latest) {
+    console.log("loading historical data ...");
+    fs.readFile("./actData.csv", "utf8", function(error, oldData) {
+      if (error) throw error;
+      oldData = d3.csvParse(oldData);
+      console.log("latest update: " + latest.date);
+      console.log("previous update: " + oldData[oldData.length - 1].date);
     });
+    if (latest.date !== oldData[oldData.length - 1].date) {
+      console.log("adding latest update to archive ...");
+      oldData = oldData.push(latest);
+      fs.writeFile("./actData.", d3.csvFormat(oldData), function(error) {
+        console.log("./actData.csv written");
+      });
+    }
   })
   .catch(console.error);
