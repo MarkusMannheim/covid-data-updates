@@ -4,7 +4,7 @@ const puppeteer = require("puppeteer"),
 
 async function scrape() {
   console.log("establish scraper ...");
-  browser = await puppeteer.launch(),
+  browser = await puppeteer.launch({ headless: false }),
   page = await browser.newPage();
   return new Promise(async function(resolve, reject) {
     try {
@@ -34,6 +34,12 @@ async function scrape() {
         date: latest[3]
       };
       console.log(latest);
+      await page.waitForSelector(".pbi-glyph-chevronrightmedium");
+      await page.evaluate(function() {
+        document.querySelector(".pbi-glyph-chevronrightmedium").click();
+      });
+      console.log("Clicked the arrow!");
+      await page.waitFor(5000);
       browser.close();
       return resolve(latest);
     } catch (error) {
@@ -45,18 +51,18 @@ async function scrape() {
 scrape()
   .then(function(latest) {
     console.log("loading historical data ...");
-    fs.readFile("./actData.csv", "utf8", function(error, oldData) {
+    fs.readFile("./actData.csv", "utf8", function(error, data) {
       if (error) throw error;
-      oldData = d3.csvParse(oldData);
+      oldData = d3.csvParse(data);
       console.log("latest update: " + latest.date);
       console.log("previous update: " + oldData[oldData.length - 1].date);
+      if (latest.date !== oldData[oldData.length - 1].date) {
+        console.log("adding latest update to archive ...");
+        oldData = oldData.push(latest);
+        fs.writeFile("./actData.", d3.csvFormat(oldData), function(error) {
+          console.log("./actData.csv written");
+        });
+      }
     });
-    if (latest.date !== oldData[oldData.length - 1].date) {
-      console.log("adding latest update to archive ...");
-      oldData = oldData.push(latest);
-      fs.writeFile("./actData.", d3.csvFormat(oldData), function(error) {
-        console.log("./actData.csv written");
-      });
-    }
   })
   .catch(console.error);
