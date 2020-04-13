@@ -4,7 +4,7 @@ const puppeteer = require("puppeteer"),
 
 async function scrape() {
   console.log("establish scraper ...");
-  browser = await puppeteer.launch({ headless: false }),
+  browser = await puppeteer.launch(),
   page = await browser.newPage();
   return new Promise(async function(resolve, reject) {
     try {
