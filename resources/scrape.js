@@ -51,8 +51,8 @@ scrape()
       console.log("previous update: " + oldData[oldData.length - 1].date);
       if (latest.date !== oldData[oldData.length - 1].date) {
         console.log("adding latest update to archive ...");
-        oldData = oldData.push(latest);
-        fs.writeFile("./actData.", d3.csvFormat(oldData, [oldData.columns]), function(error) {
+        oldData.push(latest);
+        fs.writeFile("./actData.csv", d3.csvFormat(oldData, [oldData.columns]), function(error) {
           console.log("./actData.csv written");
         });
       }
