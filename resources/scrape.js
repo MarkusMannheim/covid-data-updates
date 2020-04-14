@@ -2,8 +2,8 @@ puppeteer = require("puppeteer"),
 fs = require("fs");
 
 async function scrape() {
-  console.log("\nestablish scraper ...");
-  browser = await puppeteer.launch({headless: false}),
+  console.log("establish scraper ...");
+  browser = await puppeteer.launch(),
   page = await browser.newPage();
   return new Promise(async function(resolve, reject) {
     try {
@@ -25,31 +25,30 @@ async function scrape() {
           });
         return data;
       });
-      data = {
-        latest: {
-          recovered: latest[0],
-          confirmed: latest[1],
-          deaths: latest[2],
-          date: latest[3]
-        }
+      latest = {
+        recovered: latest[0],
+        confirmed: latest[1],
+        deaths: latest[2],
+        date: latest[3]
       };
       console.log("scraped latest update:");
-      console.log(data.latest);
-      console.log("load time-series data ...");
-      console.log(document.querySelector(".pbi-glyph-chevronrightmedium"));
-      await page.waitForSelector("input");
+      console.log(latest);
       browser.close();
-      return resolve(data);
+      return resolve(latest);
     } catch (error) {
       return reject(error);
     }
   });
 }
-
 scrape()
-  .then(function(data) {
-    fs.writeFile("./scrapeData.json", JSON.stringify(data), function(error) {
-      console.log("\nscrapeData.json written");
+  .then(function(latest) {
+    console.log("checking time-series data ...");
+    fs.readFile("./actData.csv", "utf8", function(error, oldData) {
+      console.log("latest update: " + latest.date);
+      console.log("previous update: " + oldData[oldData.length - 1].date);
+      // fs.writeFile("./actData.csv", JSON.stringify(data), function(error) {
+      //   console.log("./actData.csv written");
+      // });
     });
   })
   .catch(console.error);
