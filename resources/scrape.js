@@ -1,6 +1,6 @@
 puppeteer = require("puppeteer"),
-fs = require("fs");
-
+       fs = require("fs"),
+       d3 = require("d3");
 async function scrape() {
   console.log("establish scraper ...");
   browser = await puppeteer.launch(),
