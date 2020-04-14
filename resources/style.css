@@ -56,6 +56,7 @@ body {
 }
 .row div:last-child {
   font-family: "ABCSans Black", "Arial Black", sans-serif;
+  margin-right: 5px;
 }
 .row.confirmed div:first-child {
   background-color: #009CBF;
@@ -78,4 +79,8 @@ body {
 }
 #axisGroup path {
   stroke: none;
+}
+#axisGroup text {
+  fill: #1C1C1C;
+  font-size: .7rem;
 }

@@ -72,8 +72,8 @@
           .domain(d3.extent(covidData, function(d) { return d.confirmed; }));
         xAxis = d3.axisBottom()
           .tickSize(0)
-          .tickPadding(5)
-          .ticks(3);
+          .tickPadding(8)
+          .ticks(3, "%b %-d");
         stack = d3.stack()
           .keys(["recovered", "infected", "deaths"].reverse());
         layers = chartGroup
