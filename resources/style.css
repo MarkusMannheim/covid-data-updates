@@ -38,42 +38,41 @@ body {
   font-weight: bold;
   font-size: 1.25rem;
   color: #1C1C1C;
-  margin: 0 0 .5rem 0;
+  margin: 0 0 1rem 0;
 }
-table {
-  border-collapse: collapse;
+#table .row {
+  display: flex;
+}
+.row:nth-child(even) {
+  background-color: lightgrey;
+}
+.row div:first-child {
+  min-width: 1.25rem;
+}
+.row div:nth-child(2) {
+  margin: 0 .75rem;
   width: 100%;
+  height: 1.25rem;
 }
-tr {
-  border-bottom: dotted .5px #1C1C1C;
-}
-ul {
-  margin: 0;
-  padding: 0;
-  list-style-position: inside;
-}
-td:last-child {
+.row div:last-child {
   font-family: "ABCSans Black", "Arial Black", sans-serif;
-  text-align: right;
 }
-#treemap {
-  margin-top: 1rem;
-  width: 100%;
-  height: 100%;
+.row.confirmed div:first-child {
+  background-color: #009CBF;
 }
-rect.recovered, #recovered td:last-child {
-  fill: #009CBF;
-  color: #009CBF;
-}
-rect.negative, #negative td:last-child {
+.row.recovered div:first-child, .layer.recovered {
+  background-color: #00B395;
   fill: #00B395;
-  color: #00B395;
 }
-rect.infected, #infected td:last-child {
+.row.infected div:first-child, .layer.infected {
+  background-color: #FFB300;
   fill: #FFB300;
-  color: #FFB300;
 }
-rect.dead, #dead td:last-child {
+.row.deaths div:first-child, .layer.deaths {
+  background-color: #FF6100;
   fill: #FF6100;
-  color: #FF6100;
+}
+#chart {
+  margin-top: 1rem;
+  height: 100%;
 }

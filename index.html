@@ -6,8 +6,8 @@
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'UA-155991615-1');
+      gtag("js", new Date());
+      gtag("config", "UA-155991615-1");
     </script>
     <!-- my stuff -->
     <meta charset="utf-8">
@@ -23,81 +23,88 @@
     <div id="container">
       <div id="header">
         <h1 id="title">COVID-19 in Canberra</h1>
-        <table>
-          <tbody>
-            <tr id="cases">
-              <td><ul><li>tested positive:</li></ul></td>
-              <td></td>
-            </tr>
-            <tr id="negative">
-              <td><ul><li>tested negative:</li></ul></td>
-              <td></td>
-            </tr>
-            <tr id="infected">
-              <td><ul><li>infected:</li></ul></td>
-              <td></td>
-            </tr>
-            <tr id="recovered">
-              <td><ul><li>recovered:</li></ul></td>
-              <td></td>
-            </tr>
-            <tr id="dead">
-              <td><ul><li>dead:</li></ul></td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
+        <div id="table">
+        </div>
       </div>
-      <svg id="treemap"></svg>
+      <svg id="chart">
+        <g id="chartGroup"></g>
+        <g id="axisGroup"></g>
+      </svg>
     </div>
     <script>
-      // load scraped data (in-built cache refresh)
-      d3.json("./resources/latestCount.json?randomKey=" + Math.round(Math.random() * 9000) + 1000, function(error, data) {
+      // load scraped data (with in-built cache refresh)
+      d3.csv("./resources/actData.csv", function(error, data) {
         if (error) throw error;
         covidData = data;
-        for (key in covidData) {
-          if (document.querySelector("#" + key)) {
-            covidData[key] = +covidData[key];
-            document.querySelector("#" + key + " td:last-child").innerText = d3.format(",")(covidData[key]);
+        table = d3.select("#table");
+        chart = d3.select("#chart");
+        chartGroup = d3.select("#chartGroup");
+        axisGroup = d3.select("#axisGroup");
+        // reformat data
+        covidData.forEach(function(d) {
+          for (key in d) {
+            if (key == "date") {
+              d.date = d3.timeParse("%d/%m/%Y")(d.date);
+            } else {
+              d[key] = +d[key];
+            }
           }
-        }
-        d3.select("#infected td:last-child")
-          .text(d3.format(",")(covidData.cases - covidData.recovered));
-        svg = d3.select("svg");
-        window.addEventListener("resize", resize);
-        hierarchyData = {
-          name: "ACT", children: [
-            { name: "negative", value: covidData.negative },
-            { name: "infected", value: covidData.cases - covidData.recovered },
-            { name: "recovered", value: covidData.recovered },
-            { name: "dead", value: covidData.dead }
-          ]
-        };
-        // delete
-        root = d3.hierarchy(hierarchyData)
-          .sum(function(d) { return d.value; })
-          .sort(function(a, b) { return d3.ascending(a.value, b.value); });
-        treemap = d3.treemap()
-          .padding(1);
-        boxes = svg
-          .selectAll("rect")
-            .data(root.children)
+          d.infected = d.confirmed - d.recovered - d.deaths;
+        });
+        // fill table
+        rows = table
+          .selectAll("row")
+            .data(["confirmed", "infected", "recovered", "deaths"])
+          .enter().append("div")
+            .attr("class", function(d) { return "row " + d; });
+        rows.append("div");
+        rows.append("div")
+          .text(function(d) { return d + ":"; });
+        rows.append("div")
+          .text(function(d) { return covidData[covidData.length - 1][d]; })
+        // prepare chart
+        margin = { top: 0, right: 0, bottom: 20, left: 0};
+        x = d3.scaleBand()
+          .domain(covidData.map(function(d) { return d.date; }))
+          .paddingInner(.15);
+        y = d3.scaleLinear()
+          .domain(d3.extent(covidData, function(d) { return d.confirmed; }));
+        xAxis = d3.axisBottom()
+          .tickSize(0)
+          .tickPadding(5)
+          .ticks(3);
+        stack = d3.stack()
+          .keys(["recovered", "infected", "deaths"].reverse());
+        layers = chartGroup
+          .selectAll(".layer")
+            .data(stack(covidData))
+          .enter().append("g")
+            .attr("class", function(d) { return d.key; })
+            .classed("layer", true);
+        layers.selectAll(".bar")
+            .data(function(d) { return d; })
           .enter().append("rect")
-            .attr("class", function(d) { return "box " + d.data.name; });
+            .classed("bar", true);
         resize();
-
-        function resize() {
-          let dimensions = document.getElementById("treemap").getBoundingClientRect();
-          width = dimensions.width;
-          height = dimensions.height;
-          treemap.size([width, height])(root);
-          d3.selectAll(".box")
-            .attr("x", function(d) { return d.x0; })
-            .attr("y", function(d) { return d.y0; })
-            .attr("width", function(d) { return d.x1 - d.x0; })
-            .attr("height", function(d) { return d.y1 - d.y0; });
-        }
       });
+      function resize() {
+        let dimensions = document.getElementById("chart").getBoundingClientRect();
+        width = dimensions.width;
+        height = dimensions.height;
+        x.range([margin.left, width - margin.right]);
+        xAxis.scale(d3.scaleTime()
+          .domain(d3.extent(covidData, function(d) { return d.date; }))
+          .range(x.range())
+        );
+        axisGroup.attr("transform", "translate(0, " + (height - margin.bottom) + ")");
+        y.range([height - margin.bottom, margin.top]);
+        d3.selectAll(".bar")
+          .attr("x", function(d) { return x(d.data.date); })
+          .attr("y", function(d) { return y(d[1]); })
+          .attr("width", x.bandwidth())
+          .attr("height", function(d) { return y(d[0]) - y(d[1]); });
+        axisGroup.call(xAxis);
+        }
     </script>
   </body>
 </html>
