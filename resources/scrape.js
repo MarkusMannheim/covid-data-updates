@@ -47,8 +47,9 @@ scrape()
       console.log("latest update: " + latest.date);
       console.log("previous update: " + oldData[oldData.length - 1].date);
       if (latest.date !== oldData[oldData.length - 1].date) {
-        console.log("updating time-series data ...")
-        fs.writeFile("./actData.csv", d3.csvFormat(data, ["date", "confirmed", "recovered", "deaths"]), function(error) {
+        console.log("updating time-series data ...");
+        oldData.push(latest);
+        fs.writeFile("./actData.csv", d3.csvFormat(oldData, ["date", "confirmed", "recovered", "deaths"]), function(error) {
             console.log("./actData.csv written");
           });
       }
