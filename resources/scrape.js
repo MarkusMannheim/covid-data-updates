@@ -44,6 +44,7 @@ scrape()
   .then(function(latest) {
     console.log("checking time-series data ...");
     fs.readFile("./actData.csv", "utf8", function(error, oldData) {
+      oldData = d3.csvParse(oldData);
       console.log("latest update: " + latest.date);
       console.log("previous update: " + oldData[oldData.length - 1].date);
       if (latest.date !== oldData[oldData.length - 1].date) {
