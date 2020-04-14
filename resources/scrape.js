@@ -52,7 +52,7 @@ scrape()
       if (latest.date !== oldData[oldData.length - 1].date) {
         console.log("adding latest update to archive ...");
         oldData.push(latest);
-        fs.writeFile("./actData.csv", d3.csvFormat(oldData, [oldData.columns]), function(error) {
+        fs.writeFile("./actData.csv", d3.csvFormat(oldData, oldData.columns), function(error) {
           console.log("./actData.csv written");
         });
       }
